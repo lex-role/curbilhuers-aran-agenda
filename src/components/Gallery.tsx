@@ -14,6 +14,7 @@ const parseMarkdownImages = (text: string): GalleryImage[] => {
     const blocks = text.split('---').filter(block => block.trim());
 
     const images: GalleryImage[] = [];
+    const baseUrl = import.meta.env.DEV ? '' : '/curbilhuers-aran-agenda';
 
     for (const block of blocks) {
         const image: Partial<GalleryImage> = {};
@@ -26,7 +27,10 @@ const parseMarkdownImages = (text: string): GalleryImage[] => {
                 const key = trimmedLine.substring(0, colonIndex).trim();
                 const value = trimmedLine.substring(colonIndex + 1).trim();
 
-                if (key === 'src') image.src = value;
+                if (key === 'src') {
+                    // Añadir el baseUrl si la ruta empieza con /
+                    image.src = value.startsWith('/') ? `${baseUrl}${value}` : value;
+                }
                 else if (key === 'alt') image.alt = value;
             }
         }
@@ -57,7 +61,10 @@ export const Gallery = () => {
     useEffect(() => {
         const loadImages = async () => {
             try {
-                const response = await fetch('/gallery/images.md');
+                // Construir la URL correcta según el entorno
+                const baseUrl = import.meta.env.DEV ? '' : '/curbilhuers-aran-agenda';
+                const url = `${baseUrl}/gallery/images.md`;
+                const response = await fetch(url);
                 const text = await response.text();
                 const parsedImages = parseMarkdownImages(text);
                 setImages(parsedImages);

@@ -69,7 +69,11 @@ export const Events = () => {
     const loadEvents = async () => {
       try {
         console.log('🚀 Iniciando carga de eventos...');
-        const response = await fetch('/Events.md');
+        // Construir la URL correcta según el entorno
+        const baseUrl = import.meta.env.DEV ? '' : '/curbilhuers-aran-agenda';
+        const url = `${baseUrl}/Events.md`;
+        console.log('🔗 URL a cargar:', url);
+        const response = await fetch(url);
         console.log('📡 Respuesta recibida:', response.status, response.statusText);
 
         if (!response.ok) {
