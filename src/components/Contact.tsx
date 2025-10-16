@@ -38,7 +38,8 @@ export const Contact = () => {
     {
       icon: Mail,
       title: "Email",
-      content: "info@curbilhuers.com",
+      content: "info@corbilhuers.com",
+      link: "mailto:info@corbilhuers.com"
     },
     {
       icon: Phone,

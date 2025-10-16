@@ -29,10 +29,13 @@ export const About = () => {
             Sobre Nosotros
           </h2>
           <div className="w-24 h-1 bg-gradient-warm mx-auto mb-6"></div>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Curbilhèrs de Les es un grupo de danza tradicional dedicado a preservar y promover 
-            el rico patrimonio cultural de la Val d'Aran a través de la danza, la música y las tradiciones ancestrales.
-          </p>
+          <div className="max-w-3xl mx-auto">
+            <p className="text-lg text-muted-foreground leading-relaxed mb-6">
+              Corbilhuèrs de Les es un grupo de danza tradicional dedicado a preservar y promover 
+              el rico patrimonio cultural del Val d'Aran. A través de nuestras actuaciones, mantenemos
+              vivas las tradiciones que definen nuestra identidad cultural.
+            </p>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
