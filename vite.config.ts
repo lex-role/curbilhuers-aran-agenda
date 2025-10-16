@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? '/curbilhuers-aran-agenda/' : '/',
+  base: mode === 'development' ? '/' : '/curbilhuers-aran-agenda/',
   server: {
     host: "::",
     port: 8080,
