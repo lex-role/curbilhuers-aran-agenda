@@ -11,6 +11,9 @@ export const Footer = () => {
             <p className="text-sm text-background/60">
               © {new Date().getFullYear()} Curbilhèrs de Les. Todos los derechos reservados.
             </p>
+            <p className="text-sm text-background/60">
+              Made with ❤️ by Lex Role
+            </p>
           </div>
         </div>
       </div>

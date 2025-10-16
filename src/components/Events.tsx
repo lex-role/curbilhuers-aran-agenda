@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, MapPin, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface Event {
   title: string;
@@ -9,31 +10,91 @@ interface Event {
   description: string;
 }
 
+// Parser simple de markdown con frontmatter para el navegador
+const parseMarkdownEvents = (text: string): Event[] => {
+  console.log('📄 Contenido completo del archivo:', text);
+
+  // Dividir el contenido por bloques ---
+  const blocks = text.split('---').filter(block => block.trim());
+  console.log('📦 Bloques encontrados:', blocks.length);
+
+  const events: Event[] = [];
+
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i].trim();
+    if (!block) continue;
+
+    console.log(`\n🔍 Procesando bloque ${i + 1}:`, block);
+
+    const event: Partial<Event> = {};
+    const lines = block.split('\n');
+
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (trimmedLine.includes(':')) {
+        const colonIndex = trimmedLine.indexOf(':');
+        const key = trimmedLine.substring(0, colonIndex).trim();
+        const value = trimmedLine.substring(colonIndex + 1).trim();
+
+        if (key === 'title') event.title = value;
+        else if (key === 'date') event.date = value;
+        else if (key === 'time') event.time = value;
+        else if (key === 'location') event.location = value;
+        else if (key === 'description') event.description = value;
+      }
+    }
+
+    console.log('🎯 Evento parseado:', event);
+
+    if (event.title) {
+      events.push({
+        title: event.title || '',
+        date: event.date || '',
+        time: event.time || '',
+        location: event.location || '',
+        description: event.description || '',
+      });
+    }
+  }
+
+  console.log('✨ Total eventos parseados:', events.length, events);
+  return events;
+};
+
 export const Events = () => {
-  // En el futuro, estos eventos se cargarán desde archivos markdown
-  const events: Event[] = [
-    {
-      title: "Fiesta Mayor de Les",
-      date: "15 de Julio, 2025",
-      time: "19:00",
-      location: "Plaza del Pueblo, Les",
-      description: "Actuación especial durante las fiestas patronales con un repertorio completo de danzas tradicionales aranesas.",
-    },
-    {
-      title: "Festival de Folclore del Pirineo",
-      date: "3 de Agosto, 2025",
-      time: "18:30",
-      location: "Vielha",
-      description: "Participación en el festival internacional junto a grupos de toda la región pirenaica.",
-    },
-    {
-      title: "Celebración de Sant Miquèu",
-      date: "29 de Septiembre, 2025",
-      time: "17:00",
-      location: "Iglesia de Les",
-      description: "Danzas tradicionales en honor al patrón del valle, una celebración centenaria.",
-    },
-  ];
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        console.log('🚀 Iniciando carga de eventos...');
+        const response = await fetch('/Events.md');
+        console.log('📡 Respuesta recibida:', response.status, response.statusText);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const text = await response.text();
+        console.log('📄 Texto recibido, longitud:', text.length);
+
+        const parsedEvents = parseMarkdownEvents(text);
+        console.log('✅ Eventos parseados:', parsedEvents);
+
+        setEvents(parsedEvents);
+      } catch (error) {
+        console.error('❌ Error loading events:', error);
+        // Fallback a eventos por defecto en caso de error
+        setEvents([]);
+      } finally {
+        setLoading(false);
+        console.log('🏁 Carga finalizada');
+      }
+    };
+
+    loadEvents();
+  }, []);
 
   return (
     <section id="eventos" className="py-20 bg-muted/30">
@@ -48,35 +109,45 @@ export const Events = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {events.map((event, index) => (
-            <Card 
-              key={index} 
-              className="border-border hover:shadow-card transition-all duration-300 hover:-translate-y-1"
-            >
-              <CardHeader>
-                <CardTitle className="text-2xl text-foreground">{event.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center text-muted-foreground">
-                  <Calendar className="w-5 h-5 mr-3 text-primary" />
-                  <span>{event.date}</span>
-                </div>
-                <div className="flex items-center text-muted-foreground">
-                  <Clock className="w-5 h-5 mr-3 text-primary" />
-                  <span>{event.time}</span>
-                </div>
-                <div className="flex items-center text-muted-foreground">
-                  <MapPin className="w-5 h-5 mr-3 text-primary" />
-                  <span>{event.location}</span>
-                </div>
-                <p className="text-muted-foreground pt-2 border-t border-border">
-                  {event.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Cargando eventos...</p>
+          </div>
+        ) : events.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No hay eventos programados en este momento.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {events.map((event, index) => (
+              <Card
+                key={index}
+                className="border-border hover:shadow-card transition-all duration-300 hover:-translate-y-1"
+              >
+                <CardHeader>
+                  <CardTitle className="text-2xl text-foreground">{event.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center text-muted-foreground">
+                    <Calendar className="w-5 h-5 mr-3 text-primary" />
+                    <span>{event.date}</span>
+                  </div>
+                  <div className="flex items-center text-muted-foreground">
+                    <Clock className="w-5 h-5 mr-3 text-primary" />
+                    <span>{event.time}</span>
+                  </div>
+                  <div className="flex items-center text-muted-foreground">
+                    <MapPin className="w-5 h-5 mr-3 text-primary" />
+                    <span>{event.location}</span>
+                  </div>
+                  <p className="text-muted-foreground pt-2 border-t border-border">
+                    {event.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         <div className="mt-12 text-center">
           <p className="text-muted-foreground italic">
